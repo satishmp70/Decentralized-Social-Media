@@ -21,67 +21,143 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# Decentralized Social Media Platform
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A decentralized social media platform built with NestJS, React, and Web3 technologies. This platform allows users to interact using their Ethereum wallets as their identity.
 
-## Project setup
+## Features
 
-```bash
-$ npm install
-```
+- **Wallet-based Authentication**: Login using your Ethereum wallet through RainbowKit
+- **User Profiles**: Create and manage your profile with username, bio, and profile picture
+- **Posts**: Create and share posts (limited to 280 characters)
+- **Interactions**: Like and comment on posts
+- **Decentralized Identity**: Your wallet address serves as your unique identifier
 
-## Compile and run the project
+## Tech Stack
 
-```bash
-# development
-$ npm run start
+### Backend
+- NestJS
+- TypeScript
+- PostgreSQL
+- TypeORM
+- JWT Authentication
+- ethers.js
 
-# watch mode
-$ npm run start:dev
+### Frontend
+- React.js
+- Next.js
+- Tailwind CSS
+- RainbowKit
+- ethers.js
 
-# production mode
-$ npm run start:prod
-```
+## Prerequisites
 
-## Run tests
+- Node.js (v16 or higher)
+- PostgreSQL
+- MetaMask or any Ethereum wallet
+- WalletConnect Project ID (for RainbowKit)
 
-```bash
-# unit tests
-$ npm run test
+## Setup Instructions
 
-# e2e tests
-$ npm run test:e2e
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd decentralized-social-media
+   ```
 
-# test coverage
-$ npm run test:cov
-```
+2. Set up the backend:
+   ```bash
+   # Install dependencies
+   npm install
 
-## Deployment
+   # Create .env file
+   cp .env.example .env
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+   # Update .env with your configuration
+   # - Set up your PostgreSQL database credentials
+   # - Generate a secure JWT secret
+   # - Configure other environment variables
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+   # Start the development server
+   npm run start:dev
+   ```
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+3. Set up the frontend:
+   ```bash
+   # Navigate to frontend directory
+   cd frontend
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+   # Install dependencies
+   npm install
 
-## Resources
+   # Create .env.local file
+   cp .env.example .env.local
 
-Check out a few resources that may come in handy when working with NestJS:
+   # Update .env.local with your configuration
+   # - Set NEXT_PUBLIC_API_URL to your backend URL
+   # - Add your WalletConnect Project ID
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+   # Start the development server
+   npm run dev
+   ```
+
+4. Access the application:
+   - Backend API: http://localhost:3000
+   - Frontend: http://localhost:3001
+   - API Documentation: http://localhost:3000/api
+
+## Development
+
+### Backend
+
+The backend is built with NestJS and provides the following main features:
+- Wallet-based authentication
+- User profile management
+- Post creation and management
+- Like and comment functionality
+
+### Frontend
+
+The frontend is built with Next.js and includes:
+- Wallet connection using RainbowKit
+- Responsive UI with Tailwind CSS
+- Real-time updates for posts and interactions
+
+## API Endpoints
+
+### Authentication
+- `POST /auth/verify`: Verify wallet signature and get access token
+
+### Users
+- `GET /users/:wallet`: Get user profile
+- `POST /users`: Create/update user profile
+
+### Posts
+- `GET /posts`: Get all posts
+- `POST /posts`: Create a new post
+- `GET /posts/:id`: Get a specific post
+- `DELETE /posts/:id`: Delete a post
+
+### Comments
+- `GET /posts/:postId/comments`: Get all comments for a post
+- `POST /posts/:postId/comments`: Add a comment
+- `DELETE /posts/:postId/comments/:id`: Delete a comment
+
+### Likes
+- `POST /posts/:postId/likes`: Like a post
+- `DELETE /posts/:postId/likes`: Unlike a post
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Support
 
