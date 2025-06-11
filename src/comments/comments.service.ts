@@ -3,47 +3,46 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from './entities/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { PostsService } from '../posts/posts.service';
 
 @Injectable()
 export class CommentsService {
   constructor(
-    @InjectRepository(Comment) private repo: Repository<Comment>,
-    private readonly postsService: PostsService,
+    @InjectRepository(Comment)
+    private readonly repo: Repository<Comment>,
   ) {}
 
-  async create(postId: number, walletAddress: string, dto: CreateCommentDto): Promise<Comment> {
-    // Verify post exists
-    await this.postsService.findOne(postId);
-
+  async create(createCommentDto: CreateCommentDto, postId: string, walletAddress: string): Promise<Comment> {
     const comment = this.repo.create({
-      ...dto,
-      post_id: postId,
-      wallet_address: walletAddress,
+      content: createCommentDto.content,
+      post: { id: postId },
+      user: { wallet_address: walletAddress }
     });
     return this.repo.save(comment);
   }
 
-  async remove(id: number, walletAddress: string): Promise<void> {
+  async findOne(id: string): Promise<Comment> {
     const comment = await this.repo.findOne({
       where: { id },
+      relations: ['user', 'post']
     });
-
     if (!comment) {
       throw new NotFoundException(`Comment with ID ${id} not found`);
     }
-
-    if (comment.wallet_address !== walletAddress) {
-      throw new NotFoundException('You can only delete your own comments');
-    }
-
-    await this.repo.remove(comment);
+    return comment;
   }
 
-  async findAll(postId: number): Promise<Comment[]> {
+  async findByPost(postId: string): Promise<Comment[]> {
     return this.repo.find({
-      where: { post_id: postId },
-      order: { timestamp: 'DESC' },
+      where: { post: { id: postId } },
+      relations: ['user'],
+      order: { created_at: 'DESC' }
     });
+  }
+
+  async remove(id: string): Promise<void> {
+    const result = await this.repo.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Comment with ID ${id} not found`);
+    }
   }
 }

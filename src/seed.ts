@@ -80,42 +80,42 @@ async function bootstrap() {
     // Create Posts
     console.log('Creating posts...');
     const post1 = postRepo.create({
-      wallet_address: user1.wallet_address,
       content: 'Hello decentralized world!',
-      timestamp: new Date(),
+      user: user1,
     });
     const post2 = postRepo.create({
-      wallet_address: user2.wallet_address,
       content: 'Web3 is the future.',
-      timestamp: new Date(),
+      user: user2,
     });
     const savedPosts = await postRepo.save([post1, post2]);
     console.log('Posts created:', savedPosts);
 
     // Add Likes
     console.log('Adding likes...');
-    const savedLikes = await likeRepo.save([
-      { post_id: post1.id, wallet_address: user2.wallet_address },
-      { post_id: post2.id, wallet_address: user1.wallet_address },
-    ]);
+    const like1 = likeRepo.create({
+      post: post1,
+      user: user2,
+    });
+    const like2 = likeRepo.create({
+      post: post2,
+      user: user1,
+    });
+    const savedLikes = await likeRepo.save([like1, like2]);
     console.log('Likes added:', savedLikes);
 
     // Add Comments
     console.log('Adding comments...');
-    const savedComments = await commentRepo.save([
-      {
-        post_id: post1.id,
-        wallet_address: user2.wallet_address,
-        content: 'Nice post!',
-        timestamp: new Date(),
-      },
-      {
-        post_id: post2.id,
-        wallet_address: user1.wallet_address,
-        content: 'Absolutely agree!',
-        timestamp: new Date(),
-      },
-    ]);
+    const comment1 = commentRepo.create({
+      content: 'Nice post!',
+      post: post1,
+      user: user2,
+    });
+    const comment2 = commentRepo.create({
+      content: 'Absolutely agree!',
+      post: post2,
+      user: user1,
+    });
+    const savedComments = await commentRepo.save([comment1, comment2]);
     console.log('Comments added:', savedComments);
 
     console.log('Database seeded successfully');

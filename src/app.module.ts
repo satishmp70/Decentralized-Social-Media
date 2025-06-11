@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
+import * as Joi from 'joi';
 import { User } from './users/entities/user.entity';
 import { Post } from './posts/entities/post.entity';
 import { Like } from './likes/entities/like.entity';
@@ -12,61 +13,44 @@ import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { LikesModule } from './likes/likes.module';
 import { CommentsModule } from './comments/comments.module';
+import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
-      validationSchema: {
-        required: ['DB_HOST', 'DB_PORT', 'DB_USERNAME', 'DB_PASSWORD', 'DB_DATABASE', 'JWT_SECRET'],
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string()
+          .valid('development', 'production', 'test')
+          .default('development'),
+        DB_HOST: Joi.string().required(),
+        DB_PORT: Joi.number().default(5432),
+        DB_USERNAME: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
+        DB_DATABASE: Joi.string().required(),
+        JWT_SECRET: Joi.string().required(),
+      }),
+    }),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => {
+        const port = process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432;
+        return {
+          type: 'postgres',
+          host: process.env.DB_HOST || 'localhost',
+          port,
+          username: process.env.DB_USERNAME || 'postgres',
+          password: process.env.DB_PASSWORD || 'postgres',
+          database: process.env.DB_DATABASE || 'desocial',
+          entities: [User, Post, Like, Comment],
+          synchronize: process.env.NODE_ENV !== 'production',
+          logging: process.env.NODE_ENV === 'development',
+        };
       },
     }),
     ThrottlerModule.forRoot([{
       ttl: 60,
       limit: 10,
     }]),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
-        const host = configService.get<string>('DB_HOST');
-        const portStr = configService.get<string>('DB_PORT');
-        const username = configService.get<string>('DB_USERNAME');
-        const password = configService.get<string>('DB_PASSWORD');
-        const database = configService.get<string>('DB_DATABASE');
-
-        // Validate required environment variables
-        if (!host || !portStr || !username || !password || !database) {
-          throw new Error('Missing required database configuration. Please check your .env file.');
-        }
-
-        const port = parseInt(portStr, 10);
-        if (isNaN(port)) {
-          throw new Error('Invalid DB_PORT value. Must be a number.');
-        }
-
-        console.log('Database Configuration:', {
-          host,
-          port,
-          username,
-          database,
-          // Don't log the password for security
-        });
-
-        return {
-          type: 'postgres',
-          host,
-          port,
-          username,
-          password,
-          database,
-          entities: [User, Post, Like, Comment],
-          synchronize: configService.get('NODE_ENV') !== 'production',
-          logging: configService.get('NODE_ENV') === 'development',
-        };
-      },
-      inject: [ConfigService],
-    }),
     UsersModule,
     AuthModule,
     PostsModule,
@@ -74,4 +58,8 @@ import { CommentsModule } from './comments/comments.module';
     CommentsModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestIdMiddleware).forRoutes('*');
+  }
+}

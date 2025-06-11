@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { VerifyWalletDto } from './dto/verify-wallet.dto';
 import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -11,7 +12,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('verify')
-  @Throttle(5, 60) // 5 requests per minute
+  @Throttle({ default: { limit: 5, ttl: 60 } }) // 5 requests per minute
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verify wallet signature and get access token' })
   @ApiBody({ type: VerifyWalletDto })
@@ -53,6 +54,6 @@ export class AuthController {
     },
   })
   async verifyWallet(@Body() verifyWalletDto: VerifyWalletDto) {
-    return this.authService.verifyWallet(verifyWalletDto);
+    return this.authService.verifySignature(verifyWalletDto.message, verifyWalletDto.signature);
   }
 }
